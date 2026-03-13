@@ -17,3 +17,27 @@ python -m crawl4ai_actor.main
 
 - The actor expects input via Apify's input schema.
 - Outputs are stored in the default dataset.
+
+## Input example
+
+```json
+{
+  "startUrls": ["https://example.com"],
+  "maxPages": 50,
+  "maxDepth": 2,
+  "concurrency": 5,
+  "requestTimeoutSecs": 60,
+  "headless": true,
+  "useProxy": false,
+  "extractMode": "markdown",
+  "maxResults": 1000
+}
+```
+
+## Output fields
+
+- `url`
+- `success`
+- `status_code`
+- `error_message`
+- `content`
