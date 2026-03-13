@@ -30,7 +30,10 @@ python -m crawl4ai_actor.main
   "headless": true,
   "useProxy": false,
   "extractMode": "markdown",
-  "maxResults": 1000
+  "maxResults": 1000,
+  "sameDomainOnly": true,
+  "includePatterns": [],
+  "excludePatterns": []
 }
 ```
 

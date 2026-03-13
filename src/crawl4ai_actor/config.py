@@ -16,3 +16,6 @@ class ActorInput(BaseModel):
     proxy_groups: list[str] | None = Field(default=None, alias="proxyGroups")
     extract_mode: str = Field(default="markdown", alias="extractMode")
     max_results: int = Field(default=1000, alias="maxResults", ge=1, le=200000)
+    same_domain_only: bool = Field(default=True, alias="sameDomainOnly")
+    include_patterns: list[str] = Field(default_factory=list, alias="includePatterns")
+    exclude_patterns: list[str] = Field(default_factory=list, alias="excludePatterns")

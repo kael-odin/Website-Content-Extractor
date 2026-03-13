@@ -13,6 +13,9 @@ def test_input_aliases() -> None:
         "proxyGroups": ["RESIDENTIAL"],
         "extractMode": "markdown",
         "maxResults": 5,
+        "sameDomainOnly": False,
+        "includePatterns": ["example"],
+        "excludePatterns": ["ignore"],
     }
     parsed = ActorInput(**payload)
 
@@ -26,3 +29,6 @@ def test_input_aliases() -> None:
     assert parsed.proxy_groups == ["RESIDENTIAL"]
     assert parsed.extract_mode == "markdown"
     assert parsed.max_results == 5
+    assert parsed.same_domain_only is False
+    assert parsed.include_patterns == ["example"]
+    assert parsed.exclude_patterns == ["ignore"]

@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import re
 from collections.abc import AsyncIterator
 from typing import Any
+from urllib.parse import urlparse
 
 from crawl4ai import AsyncWebCrawler, BrowserConfig, CacheMode, CrawlerRunConfig
 
@@ -46,6 +48,9 @@ async def crawl_urls(
     headless: bool,
     proxy_url: str | None,
     extract_mode: str,
+    same_domain_only: bool,
+    include_patterns: list[str],
+    exclude_patterns: list[str],
 ) -> AsyncIterator[dict]:
     browser_config = BrowserConfig(
         headless=headless,
@@ -57,6 +62,10 @@ async def crawl_urls(
         semaphore_count=concurrency,
         page_timeout=int(request_timeout_secs * 1000),
     )
+
+    include_regexes = [re.compile(pattern) for pattern in include_patterns if pattern]
+    exclude_regexes = [re.compile(pattern) for pattern in exclude_patterns if pattern]
+    base_domains = {urlparse(url).netloc for url in start_urls if urlparse(url).netloc}
 
     async with AsyncWebCrawler(config=browser_config) as crawler:
         seen: set[str] = set()
@@ -104,7 +113,18 @@ async def crawl_urls(
                             href = link
                         elif isinstance(link, dict):
                             href = link.get("href")
-                        if href and href not in seen:
+                        if not href or href in seen:
+                            continue
+                        if same_domain_only and base_domains:
+                            if urlparse(href).netloc not in base_domains:
+                                continue
+                        if include_regexes and not any(
+                            regex.search(href) for regex in include_regexes
+                        ):
+                            continue
+                        if exclude_regexes and any(regex.search(href) for regex in exclude_regexes):
+                            continue
+                        if href not in seen:
                             seen.add(href)
                             next_frontier.append((href, current_depth + 1))
 

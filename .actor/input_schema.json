@@ -86,6 +86,30 @@
       "default": 1000,
       "minimum": 1,
       "maximum": 200000
+    },
+    "sameDomainOnly": {
+      "title": "Same Domain Only",
+      "type": "boolean",
+      "description": "Only follow links within the start URL domains.",
+      "default": true
+    },
+    "includePatterns": {
+      "title": "Include URL Patterns",
+      "type": "array",
+      "description": "Only include URLs matching these regex patterns (optional).",
+      "items": {
+        "type": "string"
+      },
+      "editor": "stringList"
+    },
+    "excludePatterns": {
+      "title": "Exclude URL Patterns",
+      "type": "array",
+      "description": "Exclude URLs matching these regex patterns.",
+      "items": {
+        "type": "string"
+      },
+      "editor": "stringList"
     }
   },
   "required": [

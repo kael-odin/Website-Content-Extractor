@@ -27,6 +27,9 @@ async def _run() -> None:
             headless=actor_input.headless,
             proxy_url=proxy_url,
             extract_mode=actor_input.extract_mode,
+            same_domain_only=actor_input.same_domain_only,
+            include_patterns=actor_input.include_patterns,
+            exclude_patterns=actor_input.exclude_patterns,
         ):
             await Actor.push_data(item)
             processed += 1
