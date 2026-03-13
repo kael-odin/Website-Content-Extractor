@@ -100,6 +100,20 @@ SCENARIOS: list[dict[str, Any]] = [
             "include_patterns": ["("],
         },
     },
+    {
+        "id": "redirect_chain",
+        "description": "Redirects should resolve and complete cleanly",
+        "timeout_secs": 45,
+        "input": {
+            "start_urls": ["https://httpbin.org/redirect/2"],
+            "extract_mode": "text",
+            "max_pages": 1,
+            "max_depth": 0,
+            "same_domain_only": True,
+            "max_retries": 0,
+            "request_timeout_secs": 20,
+        },
+    },
 ]
 
 
@@ -135,10 +149,15 @@ async def _run_scenario(scenario: dict[str, Any], timeout_secs: int = 180) -> di
 
     async def _crawl() -> list[dict[str, Any]]:
         items: list[dict[str, Any]] = []
-        async for item in crawl_urls(**payload):
-            items.append(item)
-            if len(items) >= payload["max_pages"]:
-                break
+        agen = crawl_urls(**payload)
+        try:
+            async for item in agen:
+                items.append(item)
+                if len(items) >= payload["max_pages"]:
+                    break
+        finally:
+            # Ensure underlying browser/crawler resources are released even when we stop early.
+            await agen.aclose()
         return items
 
     try:
