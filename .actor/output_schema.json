@@ -1,4 +1,5 @@
 {
+  "$schema": "https://apify-projects.github.io/actor-json-schemas/output.json?v=0.3",
   "actorOutputSchemaVersion": 1,
   "title": "Output schema",
   "description": "Dataset view for extracted pages.",
@@ -8,7 +9,6 @@
       "type": "string",
       "title": "Overview",
       "description": "Open the dataset view with extracted pages.",
-      "editor": "textfield",
       "template": "{{links.apiDefaultDatasetUrl}}/items?view=overview"
     }
   },
