@@ -1,0 +1,18 @@
+{
+  "actorOutputSchemaVersion": 1,
+  "title": "Output schema",
+  "description": "Dataset view for extracted pages.",
+  "type": "object",
+  "properties": {
+    "overview": {
+      "type": "string",
+      "title": "Overview",
+      "description": "Open the dataset view with extracted pages.",
+      "editor": "textfield",
+      "prefill": "{{links.apiDefaultDatasetUrl}}/items?view=overview"
+    }
+  },
+  "required": [
+    "overview"
+  ]
+}

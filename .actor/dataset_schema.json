@@ -1,0 +1,99 @@
+{
+  "actorSpecification": 1,
+  "fields": {},
+  "views": {
+    "overview": {
+      "title": "Overview",
+      "transformation": {
+        "fields": [
+          {
+            "label": "URL",
+            "field": "url",
+            "format": "link"
+          },
+          {
+            "label": "Title",
+            "field": "title",
+            "format": "text"
+          },
+          {
+            "label": "Status",
+            "field": "status_code",
+            "format": "number"
+          },
+          {
+            "label": "Success",
+            "field": "success",
+            "format": "boolean"
+          },
+          {
+            "label": "Content Length",
+            "field": "content_length",
+            "format": "number"
+          },
+          {
+            "label": "Internal Links",
+            "field": "links_internal_count",
+            "format": "number"
+          },
+          {
+            "label": "External Links",
+            "field": "links_external_count",
+            "format": "number"
+          },
+          {
+            "label": "Error Type",
+            "field": "error_type",
+            "format": "text"
+          },
+          {
+            "label": "Extracted At",
+            "field": "extracted_at",
+            "format": "datetime"
+          }
+        ]
+      },
+      "display": {
+        "component": "table",
+        "properties": {
+          "URL": {
+            "label": "URL",
+            "format": "link"
+          },
+          "Title": {
+            "label": "Title",
+            "format": "text"
+          },
+          "Status": {
+            "label": "Status",
+            "format": "number"
+          },
+          "Success": {
+            "label": "Success",
+            "format": "boolean"
+          },
+          "Content Length": {
+            "label": "Content Length",
+            "format": "number"
+          },
+          "Internal Links": {
+            "label": "Internal Links",
+            "format": "number"
+          },
+          "External Links": {
+            "label": "External Links",
+            "format": "number"
+          },
+          "Error Type": {
+            "label": "Error Type",
+            "format": "text"
+          },
+          "Extracted At": {
+            "label": "Extracted At",
+            "format": "datetime"
+          }
+        }
+      }
+    }
+  }
+}

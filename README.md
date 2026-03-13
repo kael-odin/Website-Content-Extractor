@@ -1,6 +1,14 @@
-# Website Content Extractor Actor
+# Website Content Extractor
 
-Extract clean page content, metadata, and link stats from websites into a structured dataset. Built for quick content analysis, site audits, and monitoring tasks.
+Extract clean website content, page metadata, and link statistics into a structured dataset. Designed for content audits, monitoring, indexing, and data pipelines.
+
+## Features
+
+- Extract page content in markdown, HTML, or text.
+- Capture title, meta description, content length, and link counts.
+- Filter by domain, include/exclude URL patterns, and set crawl depth.
+- Built-in retry, backoff, and rate limiting for stability.
+- Output schema ready for dataset views.
 
 ## Quick start
 
@@ -85,6 +93,16 @@ Each dataset item includes:
 - `extracted_at` (ISO timestamp)
 - `retry_attempt` (integer)
 - `will_retry` (boolean)
+
+## Dataset view
+
+The dataset view is defined in `.actor/dataset_schema.json` and linked from `.actor/output_schema.json`.
+
+## Docker
+
+```bash
+docker build -t website-content-extractor .
+```
 
 ## UX smoke test
 
