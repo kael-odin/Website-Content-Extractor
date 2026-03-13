@@ -45,6 +45,44 @@ def _hash_content(content: str | None) -> str | None:
     return hashlib.sha256(content.encode("utf-8", errors="ignore")).hexdigest()
 
 
+def _clean_markdown(content: str) -> str:
+    lines = [line.strip() for line in content.splitlines()]
+    cleaned: list[str] = []
+    last_line = None
+    for line in lines:
+        if not line:
+            if cleaned and cleaned[-1] != "":
+                cleaned.append("")
+            continue
+        lower = line.lower()
+        if "skip to content" in lower:
+            continue
+        if lower in {"back", "log in", "login", "sign up", "get started"}:
+            continue
+        if line.startswith(("* [", "- [", "+ [")) and len(line) < 200:
+            continue
+        link_density = (line.count("](") * 4) / max(len(line), 1)
+        if link_density > 0.4 and len(line) < 200:
+            continue
+        if last_line == line:
+            continue
+        cleaned.append(line)
+        last_line = line
+    return "\n".join(cleaned).strip()
+
+
+def _apply_truncation(content: str, max_chars: int) -> tuple[str, bool]:
+    if max_chars <= 0 or len(content) <= max_chars:
+        return content, False
+    return content[:max_chars], True
+
+
+def _make_excerpt(content: str, max_chars: int) -> str:
+    if max_chars <= 0:
+        return ""
+    return content[:max_chars]
+
+
 def _classify_error(
     status_code: int | None, error_message: str | None, success: bool
 ) -> str | None:
@@ -99,6 +137,10 @@ async def crawl_urls(
     max_requests_per_minute: int,
     enable_stealth: bool,
     user_agent: str | None,
+    clean_content: bool,
+    include_raw_content: bool,
+    max_content_chars: int,
+    content_excerpt_chars: int,
 ) -> AsyncIterator[dict]:
     browser_kwargs = {
         "headless": headless,
@@ -171,7 +213,12 @@ async def crawl_urls(
                 success = bool(getattr(result, "success", False))
                 status_code = getattr(result, "status_code", None)
                 error_message = getattr(result, "error_message", None)
-                content = _extract_content(result, extract_mode)
+                raw_content = _extract_content(result, extract_mode)
+                content = raw_content or ""
+                if clean_content and raw_content:
+                    content = _clean_markdown(raw_content)
+                content, content_truncated = _apply_truncation(content, max_content_chars)
+                content_excerpt = _make_excerpt(content, content_excerpt_chars)
                 meta = _extract_metadata(result)
                 links = getattr(result, "links", {}) or {}
                 internal_links = links.get("internal", []) if isinstance(links, dict) else []
@@ -192,7 +239,10 @@ async def crawl_urls(
                     "status_code": status_code,
                     "error_message": error_message,
                     "error_type": error_type,
-                    "content": content,
+                    "content": content or None,
+                    "content_raw": raw_content if include_raw_content else None,
+                    "content_excerpt": content_excerpt,
+                    "content_truncated": content_truncated,
                     "title": meta.get("title"),
                     "meta_description": meta.get("meta_description"),
                     "content_length": len(content) if content else 0,

@@ -35,6 +35,10 @@ async def _run() -> None:
             max_requests_per_minute=actor_input.max_requests_per_minute,
             enable_stealth=actor_input.enable_stealth,
             user_agent=actor_input.user_agent,
+            clean_content=actor_input.clean_content,
+            include_raw_content=actor_input.include_raw_content,
+            max_content_chars=actor_input.max_content_chars,
+            content_excerpt_chars=actor_input.content_excerpt_chars,
         ):
             await Actor.push_data(item)
             processed += 1

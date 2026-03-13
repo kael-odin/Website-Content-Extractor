@@ -146,6 +146,34 @@
       "type": "string",
       "description": "Custom user agent string (optional).",
       "editor": "textfield"
+    },
+    "cleanContent": {
+      "title": "Clean Content",
+      "type": "boolean",
+      "description": "Remove navigation-heavy lines and normalize whitespace.",
+      "default": true
+    },
+    "includeRawContent": {
+      "title": "Include Raw Content",
+      "type": "boolean",
+      "description": "Include unmodified content output in a separate field.",
+      "default": false
+    },
+    "maxContentChars": {
+      "title": "Max Content Characters",
+      "type": "integer",
+      "description": "Truncate content to this length (0 = unlimited).",
+      "default": 0,
+      "minimum": 0,
+      "maximum": 500000
+    },
+    "contentExcerptChars": {
+      "title": "Content Excerpt Characters",
+      "type": "integer",
+      "description": "Length of the content excerpt for quick previews.",
+      "default": 300,
+      "minimum": 0,
+      "maximum": 5000
     }
   },
   "required": [

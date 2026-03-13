@@ -24,3 +24,7 @@ class ActorInput(BaseModel):
     max_requests_per_minute: int = Field(default=0, alias="maxRequestsPerMinute", ge=0, le=6000)
     enable_stealth: bool = Field(default=False, alias="enableStealth")
     user_agent: str | None = Field(default=None, alias="userAgent")
+    clean_content: bool = Field(default=True, alias="cleanContent")
+    include_raw_content: bool = Field(default=False, alias="includeRawContent")
+    max_content_chars: int = Field(default=0, alias="maxContentChars", ge=0, le=500000)
+    content_excerpt_chars: int = Field(default=300, alias="contentExcerptChars", ge=0, le=5000)

@@ -22,6 +22,15 @@
       "content": {
         "type": ["string", "null"]
       },
+      "content_raw": {
+        "type": ["string", "null"]
+      },
+      "content_excerpt": {
+        "type": ["string", "null"]
+      },
+      "content_truncated": {
+        "type": ["boolean", "null"]
+      },
       "title": {
         "type": ["string", "null"]
       },

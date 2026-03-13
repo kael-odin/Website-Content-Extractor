@@ -47,7 +47,11 @@ python -m crawl4ai_actor.main
   "retryBackoffSecs": 2,
   "maxRequestsPerMinute": 0,
   "enableStealth": false,
-  "userAgent": null
+  "userAgent": null,
+  "cleanContent": true,
+  "includeRawContent": false,
+  "maxContentChars": 0,
+  "contentExcerptChars": 300
 }
 ```
 
@@ -73,6 +77,10 @@ python -m crawl4ai_actor.main
 | `maxRequestsPerMinute` | integer | 0 | Global rate limit (0 = unlimited). |
 | `enableStealth` | boolean | false | Enable stealth mode for tougher sites. |
 | `userAgent` | string | null | Override the user agent string. |
+| `cleanContent` | boolean | true | Remove navigation-heavy lines and normalize whitespace. |
+| `includeRawContent` | boolean | false | Include unmodified content output. |
+| `maxContentChars` | integer | 0 | Truncate content length (0 = unlimited). |
+| `contentExcerptChars` | integer | 300 | Content excerpt length for previews. |
 
 ## Output schema
 
@@ -84,6 +92,9 @@ Each dataset item includes:
 - `error_message` (string or null)
 - `error_type` (string or null)
 - `content` (string or null)
+- `content_raw` (string or null)
+- `content_excerpt` (string or null)
+- `content_truncated` (boolean)
 - `title` (string or null)
 - `meta_description` (string or null)
 - `content_length` (integer)
