@@ -46,6 +46,7 @@ python -m crawl4ai_actor.main
 - `success`
 - `status_code`
 - `error_message`
+- `error_type`
 - `content`
 - `title`
 - `meta_description`

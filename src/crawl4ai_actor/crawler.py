@@ -45,6 +45,23 @@ def _hash_content(content: str | None) -> str | None:
     return hashlib.sha256(content.encode("utf-8", errors="ignore")).hexdigest()
 
 
+def _classify_error(status_code: int | None, error_message: str | None) -> str | None:
+    if status_code is not None:
+        if 400 <= status_code < 500:
+            return "page_error"
+        if status_code >= 500:
+            return "network_error"
+    if error_message:
+        message = error_message.lower()
+        if "timeout" in message or "timed out" in message:
+            return "network_error"
+        if "connection" in message or "dns" in message:
+            return "network_error"
+        if "parse" in message or "extract" in message:
+            return "parse_error"
+    return None
+
+
 async def _iter_results(
     crawler: AsyncWebCrawler,
     urls: list[str],
@@ -139,11 +156,14 @@ async def crawl_urls(
                 url_value = getattr(result, "url", None)
                 attempt = attempts.get(url_value, 0) if url_value else 0
                 success = bool(getattr(result, "success", False))
+                status_code = getattr(result, "status_code", None)
+                error_message = getattr(result, "error_message", None)
                 content = _extract_content(result, extract_mode)
                 meta = _extract_metadata(result)
                 links = getattr(result, "links", {}) or {}
                 internal_links = links.get("internal", []) if isinstance(links, dict) else []
                 external_links = links.get("external", []) if isinstance(links, dict) else []
+                error_type = _classify_error(status_code, error_message)
                 will_retry = False
                 if not success and url_value and attempt < max_retries:
                     attempts[url_value] = attempt + 1
@@ -156,8 +176,9 @@ async def crawl_urls(
                 yield {
                     "url": url_value,
                     "success": getattr(result, "success", None),
-                    "status_code": getattr(result, "status_code", None),
-                    "error_message": getattr(result, "error_message", None),
+                    "status_code": status_code,
+                    "error_message": error_message,
+                    "error_type": error_type,
                     "content": content,
                     "title": meta.get("title"),
                     "meta_description": meta.get("meta_description"),
