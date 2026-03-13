@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import hashlib
 import re
 from collections.abc import AsyncIterator
+from datetime import UTC, datetime
 from typing import Any
 from urllib.parse import urlparse
 
@@ -23,6 +25,22 @@ def _extract_content(result: Any, extract_mode: str) -> str | None:
     if markdown_obj is None:
         return None
     return getattr(markdown_obj, "raw_markdown", None) or str(markdown_obj)
+
+
+def _extract_metadata(result: Any) -> dict:
+    metadata = getattr(result, "metadata", None) or {}
+    title = metadata.get("title")
+    description = metadata.get("description") or metadata.get("meta_description")
+    return {
+        "title": title,
+        "meta_description": description,
+    }
+
+
+def _hash_content(content: str | None) -> str | None:
+    if not content:
+        return None
+    return hashlib.sha256(content.encode("utf-8", errors="ignore")).hexdigest()
 
 
 async def _iter_results(
@@ -94,19 +112,30 @@ async def crawl_urls(
 
             async for result in _iter_results(crawler, batch, run_config):
                 processed += 1
+                content = _extract_content(result, extract_mode)
+                meta = _extract_metadata(result)
+                links = getattr(result, "links", {}) or {}
+                internal_links = links.get("internal", []) if isinstance(links, dict) else []
+                external_links = links.get("external", []) if isinstance(links, dict) else []
                 yield {
                     "url": getattr(result, "url", None),
                     "success": getattr(result, "success", None),
                     "status_code": getattr(result, "status_code", None),
                     "error_message": getattr(result, "error_message", None),
-                    "content": _extract_content(result, extract_mode),
+                    "content": content,
+                    "title": meta.get("title"),
+                    "meta_description": meta.get("meta_description"),
+                    "content_length": len(content) if content else 0,
+                    "content_hash": _hash_content(content),
+                    "links_internal_count": len(internal_links),
+                    "links_external_count": len(external_links),
+                    "extracted_at": datetime.now(UTC).isoformat(),
                 }
 
                 if processed >= max_pages:
                     break
 
                 if current_depth < max_depth and getattr(result, "success", False):
-                    links = getattr(result, "links", {}) or {}
                     for link in links.get("internal", []):
                         href = None
                         if isinstance(link, str):

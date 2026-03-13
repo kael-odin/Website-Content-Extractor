@@ -44,3 +44,10 @@ python -m crawl4ai_actor.main
 - `status_code`
 - `error_message`
 - `content`
+- `title`
+- `meta_description`
+- `content_length`
+- `content_hash`
+- `links_internal_count`
+- `links_external_count`
+- `extracted_at`
