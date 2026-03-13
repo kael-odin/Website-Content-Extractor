@@ -9,7 +9,7 @@
       "title": "Overview",
       "description": "Open the dataset view with extracted pages.",
       "editor": "textfield",
-      "prefill": "{{links.apiDefaultDatasetUrl}}/items?view=overview"
+      "template": "{{links.apiDefaultDatasetUrl}}/items?view=overview"
     }
   },
   "required": [
