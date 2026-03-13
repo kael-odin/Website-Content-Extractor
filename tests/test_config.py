@@ -19,6 +19,8 @@ def test_input_aliases() -> None:
         "maxRetries": 1,
         "retryBackoffSecs": 5,
         "maxRequestsPerMinute": 120,
+        "enableStealth": True,
+        "userAgent": "UA",
     }
     parsed = ActorInput(**payload)
 
@@ -38,3 +40,5 @@ def test_input_aliases() -> None:
     assert parsed.max_retries == 1
     assert parsed.retry_backoff_secs == 5
     assert parsed.max_requests_per_minute == 120
+    assert parsed.enable_stealth is True
+    assert parsed.user_agent == "UA"

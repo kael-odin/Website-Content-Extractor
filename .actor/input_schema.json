@@ -134,6 +134,17 @@
       "default": 0,
       "minimum": 0,
       "maximum": 6000
+    },
+    "enableStealth": {
+      "title": "Enable Stealth",
+      "type": "boolean",
+      "description": "Enable stealth mode for tougher sites.",
+      "default": false
+    },
+    "userAgent": {
+      "title": "User Agent",
+      "type": "string",
+      "description": "Custom user agent string (optional)."
     }
   },
   "required": [

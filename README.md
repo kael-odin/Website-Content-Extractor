@@ -18,6 +18,12 @@ python -m crawl4ai_actor.main
 - The actor expects input via Apify's input schema.
 - Outputs are stored in the default dataset.
 
+## UX smoke test
+
+```bash
+.venv/Scripts/python scripts/ux_smoke.py
+```
+
 ## Input example
 
 ```json
@@ -36,7 +42,9 @@ python -m crawl4ai_actor.main
   "excludePatterns": [],
   "maxRetries": 2,
   "retryBackoffSecs": 2,
-  "maxRequestsPerMinute": 0
+  "maxRequestsPerMinute": 0,
+  "enableStealth": false,
+  "userAgent": null
 }
 ```
 

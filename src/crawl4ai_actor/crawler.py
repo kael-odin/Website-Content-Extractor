@@ -45,7 +45,11 @@ def _hash_content(content: str | None) -> str | None:
     return hashlib.sha256(content.encode("utf-8", errors="ignore")).hexdigest()
 
 
-def _classify_error(status_code: int | None, error_message: str | None) -> str | None:
+def _classify_error(
+    status_code: int | None, error_message: str | None, success: bool
+) -> str | None:
+    if success:
+        return None
     if status_code is not None:
         if 400 <= status_code < 500:
             return "page_error"
@@ -59,7 +63,9 @@ def _classify_error(status_code: int | None, error_message: str | None) -> str |
             return "network_error"
         if "parse" in message or "extract" in message:
             return "parse_error"
-    return None
+        if "codec" in message or "encode" in message or "decode" in message:
+            return "parse_error"
+    return "network_error"
 
 
 async def _iter_results(
@@ -91,11 +97,18 @@ async def crawl_urls(
     max_retries: int,
     retry_backoff_secs: int,
     max_requests_per_minute: int,
+    enable_stealth: bool,
+    user_agent: str | None,
 ) -> AsyncIterator[dict]:
-    browser_config = BrowserConfig(
-        headless=headless,
-        proxy=proxy_url,
-    )
+    browser_kwargs = {
+        "headless": headless,
+        "proxy": proxy_url,
+        "enable_stealth": enable_stealth,
+        "verbose": False,
+    }
+    if user_agent:
+        browser_kwargs["user_agent"] = user_agent
+    browser_config = BrowserConfig(**browser_kwargs)
     run_config = CrawlerRunConfig(
         cache_mode=CacheMode.BYPASS,
         stream=True,
@@ -163,7 +176,7 @@ async def crawl_urls(
                 links = getattr(result, "links", {}) or {}
                 internal_links = links.get("internal", []) if isinstance(links, dict) else []
                 external_links = links.get("external", []) if isinstance(links, dict) else []
-                error_type = _classify_error(status_code, error_message)
+                error_type = _classify_error(status_code, error_message, success)
                 will_retry = False
                 if not success and url_value and attempt < max_retries:
                     attempts[url_value] = attempt + 1

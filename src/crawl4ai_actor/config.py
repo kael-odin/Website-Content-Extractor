@@ -22,3 +22,5 @@ class ActorInput(BaseModel):
     max_retries: int = Field(default=2, alias="maxRetries", ge=0, le=10)
     retry_backoff_secs: int = Field(default=2, alias="retryBackoffSecs", ge=0, le=120)
     max_requests_per_minute: int = Field(default=0, alias="maxRequestsPerMinute", ge=0, le=6000)
+    enable_stealth: bool = Field(default=False, alias="enableStealth")
+    user_agent: str | None = Field(default=None, alias="userAgent")

@@ -33,6 +33,8 @@ async def _run() -> None:
             max_retries=actor_input.max_retries,
             retry_backoff_secs=actor_input.retry_backoff_secs,
             max_requests_per_minute=actor_input.max_requests_per_minute,
+            enable_stealth=actor_input.enable_stealth,
+            user_agent=actor_input.user_agent,
         ):
             await Actor.push_data(item)
             processed += 1

@@ -13,3 +13,4 @@ build/
 .env
 .env.*
 storage/
+scripts/ux_smoke_output.json
