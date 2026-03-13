@@ -229,6 +229,9 @@ async def crawl_urls(
         if normalized:
             normalized_start_urls.append(normalized)
 
+    if not normalized_start_urls:
+        raise ValueError("No valid startUrls after normalization (http/https URLs required).")
+
     base_domains = {urlparse(url).netloc for url in normalized_start_urls if urlparse(url).netloc}
 
     async with AsyncWebCrawler(config=browser_config) as crawler:

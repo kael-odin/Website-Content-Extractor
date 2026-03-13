@@ -53,6 +53,21 @@ SCENARIOS: list[dict[str, Any]] = [
         },
     },
     {
+        "id": "mixed_start_urls",
+        "description": "Mixed valid/invalid start URLs (normalization + filtering)",
+        "input": {
+            "start_urls": [
+                " https://EXAMPLE.com#section ",
+                "mailto:test@example.com",
+                "javascript:alert(1)",
+                "/relative/path",
+            ],
+            "extract_mode": "text",
+            "max_pages": 1,
+            "max_depth": 0,
+        },
+    },
+    {
         "id": "developer_docs",
         "description": "Docs site with deep nav",
         "input": {
@@ -71,6 +86,18 @@ SCENARIOS: list[dict[str, Any]] = [
             "max_pages": 3,
             "max_depth": 1,
             "include_patterns": [r"/20"],
+        },
+    },
+    {
+        "id": "invalid_regex_patterns",
+        "description": "Invalid regex patterns should fail fast with clear error",
+        "expect_error": True,
+        "input": {
+            "start_urls": ["https://example.com"],
+            "extract_mode": "text",
+            "max_pages": 1,
+            "max_depth": 0,
+            "include_patterns": ["("],
         },
     },
 ]
@@ -103,6 +130,7 @@ def _base_input() -> dict[str, Any]:
 async def _run_scenario(scenario: dict[str, Any], timeout_secs: int = 180) -> dict[str, Any]:
     payload = _base_input()
     payload.update(scenario["input"])
+    expect_error = bool(scenario.get("expect_error"))
 
     async def _crawl() -> list[dict[str, Any]]:
         items: list[dict[str, Any]] = []
@@ -118,8 +146,11 @@ async def _run_scenario(scenario: dict[str, Any], timeout_secs: int = 180) -> di
         error = None
     except Exception as exc:  # noqa: BLE001
         items = []
-        status = "error"
+        status = "expected_error" if expect_error else "error"
         error = f"{type(exc).__name__}: {exc}"
+    else:
+        if expect_error:
+            status = "unexpected_ok"
 
     summary = {
         "id": scenario["id"],
