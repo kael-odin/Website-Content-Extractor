@@ -1,6 +1,58 @@
 {
   "actorSpecification": 1,
-  "fields": {},
+  "fields": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "url": {
+        "type": ["string", "null"]
+      },
+      "success": {
+        "type": ["boolean", "null"]
+      },
+      "status_code": {
+        "type": ["integer", "null"]
+      },
+      "error_message": {
+        "type": ["string", "null"]
+      },
+      "error_type": {
+        "type": ["string", "null"]
+      },
+      "content": {
+        "type": ["string", "null"]
+      },
+      "title": {
+        "type": ["string", "null"]
+      },
+      "meta_description": {
+        "type": ["string", "null"]
+      },
+      "content_length": {
+        "type": ["integer", "null"]
+      },
+      "content_hash": {
+        "type": ["string", "null"]
+      },
+      "links_internal_count": {
+        "type": ["integer", "null"]
+      },
+      "links_external_count": {
+        "type": ["integer", "null"]
+      },
+      "extracted_at": {
+        "type": ["string", "null"],
+        "format": "date-time"
+      },
+      "retry_attempt": {
+        "type": ["integer", "null"]
+      },
+      "will_retry": {
+        "type": ["boolean", "null"]
+      }
+    },
+    "additionalProperties": true
+  },
   "views": {
     "overview": {
       "title": "Overview",
