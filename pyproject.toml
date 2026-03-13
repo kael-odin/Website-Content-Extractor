@@ -35,3 +35,6 @@ select = ["E", "F", "I", "UP"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+filterwarnings = [
+  "ignore:urllib3 .* doesn't match a supported version!:requests.exceptions.RequestsDependencyWarning",
+]

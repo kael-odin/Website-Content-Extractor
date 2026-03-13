@@ -131,6 +131,7 @@ async def _run_scenario(scenario: dict[str, Any], timeout_secs: int = 180) -> di
     payload = _base_input()
     payload.update(scenario["input"])
     expect_error = bool(scenario.get("expect_error"))
+    scenario_timeout_secs = int(scenario.get("timeout_secs") or timeout_secs)
 
     async def _crawl() -> list[dict[str, Any]]:
         items: list[dict[str, Any]] = []
@@ -141,7 +142,7 @@ async def _run_scenario(scenario: dict[str, Any], timeout_secs: int = 180) -> di
         return items
 
     try:
-        items = await asyncio.wait_for(_crawl(), timeout=timeout_secs)
+        items = await asyncio.wait_for(_crawl(), timeout=scenario_timeout_secs)
         status = "ok"
         error = None
     except Exception as exc:  # noqa: BLE001

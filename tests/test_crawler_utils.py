@@ -2,7 +2,12 @@ from __future__ import annotations
 
 import pytest
 
-from crawl4ai_actor.crawler import _clean_markdown, _compile_patterns, _normalize_url
+from crawl4ai_actor.crawler import (
+    _classify_error,
+    _clean_markdown,
+    _compile_patterns,
+    _normalize_url,
+)
 
 
 def test_normalize_url_strips_fragment_and_lowercases() -> None:
@@ -51,3 +56,11 @@ def test_clean_markdown_removes_nav_and_link_noise() -> None:
     assert "Docs" not in cleaned
     assert "Title" in cleaned
     assert "Some real text here." in cleaned
+
+
+def test_classify_error_rate_limited() -> None:
+    assert _classify_error(429, "Too Many Requests", success=False) == "rate_limited"
+
+
+def test_classify_error_blocked() -> None:
+    assert _classify_error(403, "Forbidden", success=False) == "blocked"

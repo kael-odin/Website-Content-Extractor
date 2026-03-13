@@ -151,6 +151,10 @@ def _classify_error(
     if success:
         return None
     if status_code is not None:
+        if status_code == 429:
+            return "rate_limited"
+        if status_code in {401, 403}:
+            return "blocked"
         if 400 <= status_code < 500:
             return "page_error"
         if status_code >= 500:
