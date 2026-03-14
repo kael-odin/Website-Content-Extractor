@@ -115,6 +115,14 @@ The dataset view is defined in `.actor/dataset_schema.json` and linked from `.ac
 docker build -t website-content-extractor .
 ```
 
+## Run summary (Actor output)
+
+When the crawl finishes, the Actor writes a **run summary** to the run’s key-value store under the key `runSummary`:
+
+- `totalPages`, `successCount`, `failedCount`, `errorTypes` (e.g. `page_error`, `network_error`, `rate_limited`), `totalContentLength`
+
+Use it in the Apify run **Storage** tab or via API to see at a glance how the run went.
+
 ## UX regression (matrix)
 
 Multi-scenario regression over real sites and edge cases (redirects, mixed URLs, invalid regex). Reports to `scripts/ux_matrix_output.json` and `scripts/ux_matrix_report.txt`.
@@ -123,7 +131,16 @@ Multi-scenario regression over real sites and edge cases (redirects, mixed URLs,
 python scripts/ux_matrix.py
 ```
 
-Fast run (core only: example.com, mixed URLs, invalid regex; no external marketing/docs sites):
+**Groups** (set `UX_MATRIX_GROUP` to run a subset):
+
+| Value       | Scenarios |
+|------------|-----------|
+| `core`     | Fast, minimal deps: example.com, mixed URLs, invalid regex. Use for CI. |
+| `extended` | core + marketing, docs, blog, short redirect. |
+| `hard`     | Optional stress: longer redirect chain. Run separately so flakiness doesn’t fail base regression. |
+| (empty)    | All (core + extended + hard). |
+
+Example (core only):
 
 ```bash
 UX_MATRIX_GROUP=core python scripts/ux_matrix.py

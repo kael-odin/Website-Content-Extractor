@@ -2,7 +2,7 @@
   "$schema": "https://apify-projects.github.io/actor-json-schemas/output.json?v=0.3",
   "actorOutputSchemaVersion": 1,
   "title": "Output schema",
-  "description": "Dataset view for extracted pages.",
+  "description": "Dataset view for extracted pages; run summary (totalPages, successCount, errorTypes) is in the key-value store under runSummary.",
   "type": "object",
   "properties": {
     "overview": {

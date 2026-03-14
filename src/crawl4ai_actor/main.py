@@ -33,6 +33,9 @@ async def _run() -> None:
             proxy_url = await _maybe_get_proxy_url(actor_input.proxy_groups)
 
         processed = 0
+        success_count = 0
+        error_counts: dict[str, int] = {}
+        total_content_chars = 0
         async for item in crawl_urls(
             start_urls=actor_input.start_urls,
             max_pages=actor_input.max_pages,
@@ -57,8 +60,26 @@ async def _run() -> None:
         ):
             await Actor.push_data(item)
             processed += 1
+            if item.get("success"):
+                success_count += 1
+            et = item.get("error_type") or "none"
+            error_counts[et] = error_counts.get(et, 0) + 1
+            total_content_chars += item.get("content_length") or 0
             if processed >= actor_input.max_results:
                 break
+
+        run_summary = {
+            "totalPages": processed,
+            "successCount": success_count,
+            "failedCount": processed - success_count,
+            "errorTypes": error_counts,
+            "totalContentLength": total_content_chars,
+        }
+        await Actor.set_value("runSummary", run_summary)
+        Actor.log.info(
+            f"Run finished: {success_count}/{processed} pages ok, "
+            f"errors: {dict(error_counts)}"
+        )
 
 
 async def _maybe_get_proxy_url(proxy_groups: list[str] | None) -> str | None:

@@ -125,6 +125,21 @@ SCENARIOS: list[dict[str, Any]] = [
             "request_timeout_secs": 20,
         },
     },
+    {
+        "id": "redirect_chain_long",
+        "group": "hard",
+        "description": "Longer redirect chain (optional stress)",
+        "timeout_secs": 60,
+        "input": {
+            "start_urls": ["https://httpbin.org/redirect/3"],
+            "extract_mode": "text",
+            "max_pages": 1,
+            "max_depth": 0,
+            "same_domain_only": True,
+            "max_retries": 0,
+            "request_timeout_secs": 25,
+        },
+    },
 ]
 
 
@@ -211,8 +226,13 @@ async def _run_scenario(scenario: dict[str, Any], timeout_secs: int = 180) -> di
 
 
 def _select_scenarios() -> list[dict[str, Any]]:
-    if UX_MATRIX_GROUP == "core":
+    group = UX_MATRIX_GROUP
+    if group == "core":
         return [s for s in SCENARIOS if s.get("group") == "core"]
+    if group == "extended":
+        return [s for s in SCENARIOS if s.get("group") in ("core", "extended")]
+    if group == "hard":
+        return [s for s in SCENARIOS if s.get("group") == "hard"]
     return list(SCENARIOS)
 
 
@@ -223,8 +243,8 @@ async def main() -> None:
         sys.stderr.reconfigure(encoding="utf-8")
 
     scenarios_to_run = _select_scenarios()
-    if UX_MATRIX_GROUP == "core":
-        print("UX_MATRIX_GROUP=core: running core scenarios only")
+    if UX_MATRIX_GROUP:
+        print(f"UX_MATRIX_GROUP={UX_MATRIX_GROUP}: running {len(scenarios_to_run)} scenario(s)")
     report = {
         "generated_at": datetime.now(UTC).isoformat(),
         "group_filter": UX_MATRIX_GROUP or None,
