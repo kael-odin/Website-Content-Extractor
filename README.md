@@ -115,8 +115,16 @@ The dataset view is defined in `.actor/dataset_schema.json` and linked from `.ac
 docker build -t website-content-extractor .
 ```
 
-## UX smoke test
+## UX regression (matrix)
+
+Multi-scenario regression over real sites and edge cases (redirects, mixed URLs, invalid regex). Reports to `scripts/ux_matrix_output.json` and `scripts/ux_matrix_report.txt`.
 
 ```bash
-.venv/Scripts/python scripts/ux_smoke.py
+python scripts/ux_matrix.py
+```
+
+Fast run (core only: example.com, mixed URLs, invalid regex; no external marketing/docs sites):
+
+```bash
+UX_MATRIX_GROUP=core python scripts/ux_matrix.py
 ```

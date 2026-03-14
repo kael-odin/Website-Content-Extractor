@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import sys
 import warnings
 from datetime import UTC, datetime
@@ -20,10 +21,13 @@ warnings.filterwarnings(
 
 from crawl4ai_actor.crawler import crawl_urls
 
+# Run only "core" scenarios when UX_MATRIX_GROUP=core (fast, minimal external deps).
+UX_MATRIX_GROUP = os.environ.get("UX_MATRIX_GROUP", "").strip().lower()
 
 SCENARIOS: list[dict[str, Any]] = [
     {
         "id": "marketing_home",
+        "group": "extended",
         "description": "Marketing homepage with dynamic content",
         "input": {
             "start_urls": ["https://www.apify.com"],
@@ -34,6 +38,7 @@ SCENARIOS: list[dict[str, Any]] = [
     },
     {
         "id": "knowledge_base",
+        "group": "extended",
         "description": "Static knowledge page",
         "input": {
             "start_urls": ["https://www.wikipedia.org"],
@@ -44,6 +49,7 @@ SCENARIOS: list[dict[str, Any]] = [
     },
     {
         "id": "simple_static",
+        "group": "core",
         "description": "Small static site",
         "input": {
             "start_urls": ["https://example.com"],
@@ -54,6 +60,7 @@ SCENARIOS: list[dict[str, Any]] = [
     },
     {
         "id": "mixed_start_urls",
+        "group": "core",
         "description": "Mixed valid/invalid start URLs (normalization + filtering)",
         "input": {
             "start_urls": [
@@ -69,6 +76,7 @@ SCENARIOS: list[dict[str, Any]] = [
     },
     {
         "id": "developer_docs",
+        "group": "extended",
         "description": "Docs site with deep nav",
         "input": {
             "start_urls": ["https://docs.apify.com/"],
@@ -79,6 +87,7 @@ SCENARIOS: list[dict[str, Any]] = [
     },
     {
         "id": "blog",
+        "group": "extended",
         "description": "Blog with mixed content",
         "input": {
             "start_urls": ["https://blog.apify.com/"],
@@ -90,6 +99,7 @@ SCENARIOS: list[dict[str, Any]] = [
     },
     {
         "id": "invalid_regex_patterns",
+        "group": "core",
         "description": "Invalid regex patterns should fail fast with clear error",
         "expect_error": True,
         "input": {
@@ -102,6 +112,7 @@ SCENARIOS: list[dict[str, Any]] = [
     },
     {
         "id": "redirect_chain",
+        "group": "extended",
         "description": "Redirects should resolve and complete cleanly",
         "timeout_secs": 45,
         "input": {
@@ -199,20 +210,49 @@ async def _run_scenario(scenario: dict[str, Any], timeout_secs: int = 180) -> di
     }
 
 
+def _select_scenarios() -> list[dict[str, Any]]:
+    if UX_MATRIX_GROUP == "core":
+        return [s for s in SCENARIOS if s.get("group") == "core"]
+    return list(SCENARIOS)
+
+
 async def main() -> None:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
     if hasattr(sys.stderr, "reconfigure"):
         sys.stderr.reconfigure(encoding="utf-8")
 
+    scenarios_to_run = _select_scenarios()
+    if UX_MATRIX_GROUP == "core":
+        print("UX_MATRIX_GROUP=core: running core scenarios only")
     report = {
         "generated_at": datetime.now(UTC).isoformat(),
+        "group_filter": UX_MATRIX_GROUP or None,
         "scenarios": [],
     }
 
-    for scenario in SCENARIOS:
+    t0 = datetime.now(UTC)
+    for scenario in scenarios_to_run:
         result = await _run_scenario(scenario)
         report["scenarios"].append(result)
+    elapsed_secs = (datetime.now(UTC) - t0).total_seconds()
+
+    report["elapsed_secs"] = round(elapsed_secs, 1)
+    ok = sum(1 for r in report["scenarios"] if r["summary"]["status"] == "ok")
+    expected_error = sum(
+        1 for r in report["scenarios"] if r["summary"]["status"] == "expected_error"
+    )
+    failed = sum(
+        1
+        for r in report["scenarios"]
+        if r["summary"]["status"] in ("error", "unexpected_ok")
+    )
+    report["summary_counts"] = {
+        "ok": ok,
+        "expected_error": expected_error,
+        "failed": failed,
+        "total": len(report["scenarios"]),
+    }
 
     output_path = Path("scripts/ux_matrix_output.json")
     output_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -225,6 +265,13 @@ async def main() -> None:
             f"{summary['success']}/{summary['count']} success | "
             f"avg_len={summary['avg_content_length']}"
         )
+    summary_lines.append("")
+    summary_lines.append(
+        f"Total: {report['summary_counts']['ok']} ok, "
+        f"{report['summary_counts']['expected_error']} expected_error, "
+        f"{report['summary_counts']['failed']} failed | "
+        f"{report['elapsed_secs']}s"
+    )
 
     Path("scripts/ux_matrix_report.txt").write_text(
         "\n".join(summary_lines), encoding="utf-8"
