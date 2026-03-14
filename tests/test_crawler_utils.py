@@ -7,6 +7,7 @@ from crawl4ai_actor.crawler import (
     _clean_markdown,
     _compile_patterns,
     _normalize_url,
+    _normalize_wait_for,
 )
 
 
@@ -20,6 +21,22 @@ def test_normalize_url_rejects_non_http_schemes() -> None:
     assert _normalize_url("mailto:test@example.com") is None
     assert _normalize_url("javascript:alert(1)") is None
     assert _normalize_url("file:///etc/passwd") is None
+
+
+def test_normalize_wait_for_returns_none_for_empty() -> None:
+    assert _normalize_wait_for(None) is None
+    assert _normalize_wait_for("") is None
+    assert _normalize_wait_for("   ") is None
+
+
+def test_normalize_wait_for_passes_through_css_js_prefix() -> None:
+    assert _normalize_wait_for("css:.article") == "css:.article"
+    assert _normalize_wait_for("js:() => true") == "js:() => true"
+
+
+def test_normalize_wait_for_adds_css_prefix_for_plain_selector() -> None:
+    assert _normalize_wait_for(".main") == "css:.main"
+    assert _normalize_wait_for("  #content  ") == "css:#content"
 
 
 def test_normalize_url_rejects_relative_or_blank() -> None:

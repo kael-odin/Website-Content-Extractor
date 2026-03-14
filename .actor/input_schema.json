@@ -174,6 +174,62 @@
       "default": 300,
       "minimum": 0,
       "maximum": 5000
+    },
+    "wordCountThreshold": {
+      "title": "Word Count Threshold",
+      "type": "integer",
+      "description": "Ignore text blocks with fewer words (0 = off). Reduces noise from empty or stub pages.",
+      "default": 0,
+      "minimum": 0,
+      "maximum": 1000
+    },
+    "virtualScrollSelector": {
+      "title": "Virtual Scroll Selector",
+      "type": "string",
+      "description": "CSS selector for infinite-scroll container (e.g. #feed). When set, the crawler scrolls to load more content before extraction."
+    },
+    "virtualScrollCount": {
+      "title": "Virtual Scroll Count",
+      "type": "integer",
+      "description": "Max scroll steps when virtual scroll is enabled.",
+      "default": 10,
+      "minimum": 1,
+      "maximum": 100
+    },
+    "waitUntil": {
+      "title": "Wait Until",
+      "type": "string",
+      "description": "Page load strategy: domcontentloaded (fast), load (full load), or networkidle (SPA/slow sites).",
+      "default": "domcontentloaded",
+      "enum": ["domcontentloaded", "load", "networkidle"]
+    },
+    "pageLoadWaitSecs": {
+      "title": "Page Load Wait (seconds)",
+      "type": "number",
+      "description": "Extra delay in seconds after load before capturing HTML. Use for slow/SPA sites.",
+      "default": 0,
+      "minimum": 0,
+      "maximum": 60
+    },
+    "waitForSelector": {
+      "title": "Wait For Selector",
+      "type": "string",
+      "description": "CSS selector to wait for before extraction (e.g. .article-body or #main). Use css: or js: prefix for advanced conditions.",
+      "editor": "textfield"
+    },
+    "waitForTimeoutSecs": {
+      "title": "Wait For Timeout (seconds)",
+      "type": "integer",
+      "description": "Max seconds to wait for Wait For Selector. Ignored if Wait For Selector is empty.",
+      "default": 30,
+      "minimum": 1,
+      "maximum": 300
+    },
+    "cssSelector": {
+      "title": "CSS Selector (extract region only)",
+      "type": "string",
+      "description": "Extract only content inside this CSS selector (e.g. main, .content, #article).",
+      "editor": "textfield"
     }
   },
   "required": [

@@ -164,6 +164,14 @@ def _base_input() -> dict[str, Any]:
         "include_raw_content": False,
         "max_content_chars": 5000,
         "content_excerpt_chars": 200,
+        "word_count_threshold": 0,
+        "virtual_scroll_selector": None,
+        "virtual_scroll_count": 10,
+        "wait_until": "domcontentloaded",
+        "page_load_wait_secs": 0.0,
+        "wait_for_selector": None,
+        "wait_for_timeout_secs": 30,
+        "css_selector": None,
     }
 
 
@@ -263,9 +271,7 @@ async def main() -> None:
         1 for r in report["scenarios"] if r["summary"]["status"] == "expected_error"
     )
     failed = sum(
-        1
-        for r in report["scenarios"]
-        if r["summary"]["status"] in ("error", "unexpected_ok")
+        1 for r in report["scenarios"] if r["summary"]["status"] in ("error", "unexpected_ok")
     )
     report["summary_counts"] = {
         "ok": ok,
@@ -293,9 +299,7 @@ async def main() -> None:
         f"{report['elapsed_secs']}s"
     )
 
-    Path("scripts/ux_matrix_report.txt").write_text(
-        "\n".join(summary_lines), encoding="utf-8"
-    )
+    Path("scripts/ux_matrix_report.txt").write_text("\n".join(summary_lines), encoding="utf-8")
     print("\n".join(summary_lines))
 
 

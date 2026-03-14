@@ -55,3 +55,24 @@ def test_validation_requires_start_urls() -> None:
 def test_validation_requires_non_empty_start_urls() -> None:
     with pytest.raises(ValidationError):
         ActorInput(**{"startUrls": []})
+
+
+def test_word_count_and_virtual_scroll_defaults() -> None:
+    inp = ActorInput(**{"startUrls": ["https://example.com"]})
+    assert inp.word_count_threshold == 0
+    assert inp.virtual_scroll_selector is None
+    assert inp.virtual_scroll_count == 10
+
+
+def test_word_count_and_virtual_scroll_aliases() -> None:
+    inp = ActorInput(
+        **{
+            "startUrls": ["https://example.com"],
+            "wordCountThreshold": 20,
+            "virtualScrollSelector": "#feed",
+            "virtualScrollCount": 5,
+        }
+    )
+    assert inp.word_count_threshold == 20
+    assert inp.virtual_scroll_selector == "#feed"
+    assert inp.virtual_scroll_count == 5

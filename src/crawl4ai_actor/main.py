@@ -67,6 +67,14 @@ async def _run() -> None:
                 include_raw_content=actor_input.include_raw_content,
                 max_content_chars=actor_input.max_content_chars,
                 content_excerpt_chars=actor_input.content_excerpt_chars,
+                word_count_threshold=actor_input.word_count_threshold,
+                virtual_scroll_selector=actor_input.virtual_scroll_selector,
+                virtual_scroll_count=actor_input.virtual_scroll_count,
+                wait_until=actor_input.wait_until,
+                page_load_wait_secs=actor_input.page_load_wait_secs,
+                wait_for_selector=actor_input.wait_for_selector,
+                wait_for_timeout_secs=actor_input.wait_for_timeout_secs,
+                css_selector=actor_input.css_selector,
             ):
                 await Actor.push_data(item)
                 processed += 1
@@ -85,8 +93,7 @@ async def _run() -> None:
 
         await _set_run_summary(processed, success_count, error_counts, total_content_chars)
         Actor.log.info(
-            f"Run finished: {success_count}/{processed} pages ok, "
-            f"errors: {dict(error_counts)}"
+            f"Run finished: {success_count}/{processed} pages ok, errors: {dict(error_counts)}"
         )
 
 

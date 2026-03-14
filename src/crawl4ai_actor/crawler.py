@@ -9,7 +9,13 @@ from datetime import UTC, datetime
 from typing import Any
 from urllib.parse import urlparse, urlunparse
 
-from crawl4ai import AsyncWebCrawler, BrowserConfig, CacheMode, CrawlerRunConfig
+from crawl4ai import (
+    AsyncWebCrawler,
+    BrowserConfig,
+    CacheMode,
+    CrawlerRunConfig,
+    VirtualScrollConfig,
+)
 
 
 def _normalize_url(url: str | None) -> str | None:
@@ -186,6 +192,16 @@ async def _iter_results(
             yield result
 
 
+def _normalize_wait_for(selector: str | None) -> str | None:
+    """Pass through css:/js: prefix; otherwise treat as CSS selector."""
+    if not selector or not selector.strip():
+        return None
+    s = selector.strip()
+    if s.startswith(("css:", "js:")):
+        return s
+    return f"css:{s}"
+
+
 async def crawl_urls(
     start_urls: list[str],
     max_pages: int,
@@ -207,6 +223,14 @@ async def crawl_urls(
     include_raw_content: bool,
     max_content_chars: int,
     content_excerpt_chars: int,
+    word_count_threshold: int,
+    virtual_scroll_selector: str | None,
+    virtual_scroll_count: int,
+    wait_until: str,
+    page_load_wait_secs: float,
+    wait_for_selector: str | None,
+    wait_for_timeout_secs: int,
+    css_selector: str | None,
 ) -> AsyncIterator[dict]:
     browser_kwargs = {
         "headless": headless,
@@ -217,12 +241,30 @@ async def crawl_urls(
     if user_agent:
         browser_kwargs["user_agent"] = user_agent
     browser_config = BrowserConfig(**browser_kwargs)
-    run_config = CrawlerRunConfig(
-        cache_mode=CacheMode.BYPASS,
-        stream=True,
-        semaphore_count=concurrency,
-        page_timeout=int(request_timeout_secs * 1000),
-    )
+    run_config_kwargs: dict[str, Any] = {
+        "cache_mode": CacheMode.BYPASS,
+        "stream": True,
+        "semaphore_count": concurrency,
+        "page_timeout": int(request_timeout_secs * 1000),
+        "wait_until": wait_until,
+        "delay_before_return_html": max(0.0, page_load_wait_secs),
+    }
+    if word_count_threshold > 0:
+        run_config_kwargs["word_count_threshold"] = word_count_threshold
+    wait_for = _normalize_wait_for(wait_for_selector)
+    if wait_for:
+        run_config_kwargs["wait_for"] = wait_for
+        run_config_kwargs["wait_for_timeout"] = int(wait_for_timeout_secs * 1000)
+    if css_selector and css_selector.strip():
+        run_config_kwargs["css_selector"] = css_selector.strip()
+    if virtual_scroll_selector:
+        run_config_kwargs["virtual_scroll_config"] = VirtualScrollConfig(
+            container_selector=virtual_scroll_selector,
+            scroll_count=virtual_scroll_count,
+            scroll_by="container_height",
+            wait_after_scroll=0.5,
+        )
+    run_config = CrawlerRunConfig(**run_config_kwargs)
 
     include_regexes = _compile_patterns(include_patterns, "includePatterns")
     exclude_regexes = _compile_patterns(exclude_patterns, "excludePatterns")
