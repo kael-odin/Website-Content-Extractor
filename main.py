@@ -132,7 +132,13 @@ async def run():
         raw = {k: v for k, v in raw.items() if k != "version"}
         input_dict = {**DEFAULT_INPUT, **raw}
 
-        raw_urls = input_dict.get("startUrls") or input_dict.get("start_urls") or input_dict.get("starturls")
+        # CafeScraper currently sends single URL as top-level 'url' field, even if input_schema defines startUrls.
+        raw_urls = (
+            input_dict.get("startUrls")
+            or input_dict.get("start_urls")
+            or input_dict.get("starturls")
+            or input_dict.get("url")
+        )
         start_urls = _normalize_start_urls(raw_urls)
         CafeSDK.Log.debug(f"Normalized startUrls: {start_urls}")
         if not start_urls:
