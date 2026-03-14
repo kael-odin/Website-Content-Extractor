@@ -172,6 +172,8 @@ def _base_input() -> dict[str, Any]:
         "wait_for_selector": None,
         "wait_for_timeout_secs": 30,
         "css_selector": None,
+        "crawl_mode": "full",
+        "include_link_urls": False,
     }
 
 

@@ -33,7 +33,11 @@ async def _run() -> None:
         try:
             actor_input = ActorInput(**raw_input)
         except ValidationError as e:
-            Actor.log.error(f"Invalid input: {e}")
+            errs = e.errors()
+            msg = errs[0].get("msg", str(e)) if errs else str(e)
+            loc = errs[0].get("loc", ())
+            hint = f" {loc[0]}: {msg}" if loc else f" {msg}"
+            Actor.log.error(f"Invalid input:{hint}")
             await _set_run_summary(0, 0, {"validation_error": 1}, 0)
             return
 
@@ -45,6 +49,7 @@ async def _run() -> None:
         success_count = 0
         error_counts: dict[str, int] = {}
         total_content_chars = 0
+        failed_urls: list[str] = []
         try:
             async for item in crawl_urls(
                 start_urls=actor_input.start_urls,
@@ -75,11 +80,15 @@ async def _run() -> None:
                 wait_for_selector=actor_input.wait_for_selector,
                 wait_for_timeout_secs=actor_input.wait_for_timeout_secs,
                 css_selector=actor_input.css_selector,
+                crawl_mode=actor_input.crawl_mode,
+                include_link_urls=actor_input.include_link_urls,
             ):
                 await Actor.push_data(item)
                 processed += 1
                 if item.get("success"):
                     success_count += 1
+                else:
+                    failed_urls.append(item.get("url"))
                 et = item.get("error_type") or "none"
                 error_counts[et] = error_counts.get(et, 0) + 1
                 total_content_chars += item.get("content_length") or 0
@@ -88,10 +97,10 @@ async def _run() -> None:
         except Exception:
             Actor.log.exception("Crawl failed")
             error_counts["crawl_error"] = error_counts.get("crawl_error", 0) + 1
-            await _set_run_summary(processed, success_count, error_counts, total_content_chars)
+            await _set_run_summary(processed, success_count, error_counts, total_content_chars, failed_urls)
             raise
 
-        await _set_run_summary(processed, success_count, error_counts, total_content_chars)
+        await _set_run_summary(processed, success_count, error_counts, total_content_chars, failed_urls)
         Actor.log.info(
             f"Run finished: {success_count}/{processed} pages ok, errors: {dict(error_counts)}"
         )
@@ -102,14 +111,17 @@ async def _set_run_summary(
     success_count: int,
     error_counts: dict[str, int],
     total_content_chars: int,
+    failed_urls: list[str] | None = None,
 ) -> None:
-    run_summary = {
+    run_summary: dict = {
         "totalPages": processed,
         "successCount": success_count,
         "failedCount": processed - success_count,
         "errorTypes": error_counts,
         "totalContentLength": total_content_chars,
     }
+    if failed_urls:
+        run_summary["failedUrls"] = [u for u in failed_urls if u]
     await Actor.set_value("runSummary", run_summary)
 
 

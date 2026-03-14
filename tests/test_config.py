@@ -76,3 +76,18 @@ def test_word_count_and_virtual_scroll_aliases() -> None:
     assert inp.word_count_threshold == 20
     assert inp.virtual_scroll_selector == "#feed"
     assert inp.virtual_scroll_count == 5
+
+
+def test_crawl_mode_and_include_link_urls() -> None:
+    inp = ActorInput(**{"startUrls": ["https://example.com"]})
+    assert inp.crawl_mode == "full"
+    assert inp.include_link_urls is False
+    inp2 = ActorInput(
+        **{
+            "startUrls": ["https://example.com"],
+            "crawlMode": "discover_only",
+            "includeLinkUrls": True,
+        }
+    )
+    assert inp2.crawl_mode == "discover_only"
+    assert inp2.include_link_urls is True

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -37,3 +39,5 @@ class ActorInput(BaseModel):
     wait_for_selector: str | None = Field(default=None, alias="waitForSelector")
     wait_for_timeout_secs: int = Field(default=30, alias="waitForTimeoutSecs", ge=1, le=300)
     css_selector: str | None = Field(default=None, alias="cssSelector")
+    crawl_mode: Literal["full", "discover_only"] = Field(default="full", alias="crawlMode")
+    include_link_urls: bool = Field(default=False, alias="includeLinkUrls")

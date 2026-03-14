@@ -192,6 +192,17 @@ async def _iter_results(
             yield result
 
 
+def _link_urls(links_list: list[Any]) -> list[str]:
+    """Normalize crawl4ai links (str or dict with href) to list of URL strings."""
+    out: list[str] = []
+    for link in links_list or []:
+        href = link if isinstance(link, str) else (link.get("href") if isinstance(link, dict) else None)
+        u = _normalize_url(href) if href else None
+        if u:
+            out.append(u)
+    return out
+
+
 def _normalize_wait_for(selector: str | None) -> str | None:
     """Pass through css:/js: prefix; otherwise treat as CSS selector."""
     if not selector or not selector.strip():
@@ -231,6 +242,8 @@ async def crawl_urls(
     wait_for_selector: str | None,
     wait_for_timeout_secs: int,
     css_selector: str | None,
+    crawl_mode: str,
+    include_link_urls: bool,
 ) -> AsyncIterator[dict]:
     browser_kwargs = {
         "headless": headless,
@@ -341,6 +354,8 @@ async def crawl_urls(
                 links = getattr(result, "links", {}) or {}
                 internal_links = links.get("internal", []) if isinstance(links, dict) else []
                 external_links = links.get("external", []) if isinstance(links, dict) else []
+                internal_urls = _link_urls(internal_links)
+                external_urls = _link_urls(external_links)
                 error_type = _classify_error(status_code, error_message, success)
                 will_retry = False
                 if not success and url_value and attempt < max_retries:
@@ -351,26 +366,44 @@ async def crawl_urls(
                     frontier.append((url_value, current_depth))
                     will_retry = True
 
-                yield {
-                    "url": url_value,
-                    "success": getattr(result, "success", None),
-                    "status_code": status_code,
-                    "error_message": error_message,
-                    "error_type": error_type,
-                    "content": content or None,
-                    "content_raw": raw_content if include_raw_content else None,
-                    "content_excerpt": content_excerpt,
-                    "content_truncated": content_truncated,
-                    "title": meta.get("title"),
-                    "meta_description": meta.get("meta_description"),
-                    "content_length": len(content) if content else 0,
-                    "content_hash": _hash_content(content),
-                    "links_internal_count": len(internal_links),
-                    "links_external_count": len(external_links),
-                    "extracted_at": datetime.now(UTC).isoformat(),
-                    "retry_attempt": attempt,
-                    "will_retry": will_retry,
-                }
+                if crawl_mode == "discover_only":
+                    yield {
+                        "url": url_value,
+                        "success": getattr(result, "success", None),
+                        "status_code": status_code,
+                        "error_type": error_type,
+                        "title": meta.get("title"),
+                        "links_internal": internal_urls,
+                        "links_external": external_urls,
+                        "links_internal_count": len(internal_urls),
+                        "links_external_count": len(external_urls),
+                        "extracted_at": datetime.now(UTC).isoformat(),
+                    }
+                else:
+                    item: dict[str, Any] = {
+                        "url": url_value,
+                        "success": getattr(result, "success", None),
+                        "status_code": status_code,
+                        "error_message": error_message,
+                        "error_type": error_type,
+                        "content": content or None,
+                        "content_raw": raw_content if include_raw_content else None,
+                        "content_excerpt": content_excerpt,
+                        "content_truncated": content_truncated,
+                        "title": meta.get("title"),
+                        "meta_description": meta.get("meta_description"),
+                        "content_length": len(content) if content else 0,
+                        "content_hash": _hash_content(content),
+                        "links_internal_count": len(internal_urls),
+                        "links_external_count": len(external_urls),
+                        "extracted_at": datetime.now(UTC).isoformat(),
+                        "retry_attempt": attempt,
+                        "will_retry": will_retry,
+                    }
+                    if include_link_urls:
+                        item["links_internal"] = internal_urls
+                        item["links_external"] = external_urls
+                    yield item
 
                 if processed_requests >= max_pages:
                     break

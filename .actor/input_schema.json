@@ -230,6 +230,19 @@
       "type": "string",
       "description": "Extract only content inside this CSS selector (e.g. main, .content, #article).",
       "editor": "textfield"
+    },
+    "crawlMode": {
+      "title": "Crawl Mode",
+      "type": "string",
+      "description": "full = extract content; discover_only = only URLs and links (no content, fast).",
+      "default": "full",
+      "enum": ["full", "discover_only"]
+    },
+    "includeLinkUrls": {
+      "title": "Include Link URLs",
+      "type": "boolean",
+      "description": "Include links_internal and links_external arrays in each item (full mode only).",
+      "default": false
     }
   },
   "required": [

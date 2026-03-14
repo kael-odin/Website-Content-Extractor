@@ -2,7 +2,7 @@
   "actorSpecification": 1,
   "name": "website-content-extractor",
   "title": "Website Content Extractor",
-  "description": "Extract clean page content, metadata, and link stats into a structured dataset. Supports waitUntil/pageLoadWait for slow/SPA sites, waitForSelector for dynamic content, and cssSelector for region-only extraction. Run summary (totalPages, successCount, errorTypes) is written to Storage → Key-value store under runSummary.",
+  "description": "Extract page content (markdown/HTML/text), metadata, and links. Modes: full (default) or discover_only (URLs+links only). Options: waitUntil, waitForSelector, cssSelector for SPA/region extraction. Run summary includes failedUrls for retries.",
   "version": "0.1",
   "meta": {
     "templateId": "python"
