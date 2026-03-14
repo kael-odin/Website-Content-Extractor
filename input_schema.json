@@ -1,0 +1,197 @@
+{
+  "description": "Crawls one or more start URLs, extracts page content (markdown, HTML, or text), and optionally follows same-domain links. Uses crawl4ai for browser-based extraction with configurable depth, concurrency, and output format.",
+  "b": "startUrls",
+  "properties": [
+    {
+      "title": "Start URLs",
+      "name": "startUrls",
+      "type": "array",
+      "editor": "requestList",
+      "description": "Starting URLs to crawl (e.g. https://example.com). One or more URLs.",
+      "default": [{ "url": "https://example.com" }],
+      "required": true
+    },
+    {
+      "title": "Max pages",
+      "name": "maxPages",
+      "type": "integer",
+      "editor": "number",
+      "description": "Maximum pages to process in total (1–10000).",
+      "default": 50
+    },
+    {
+      "title": "Max depth",
+      "name": "maxDepth",
+      "type": "integer",
+      "editor": "number",
+      "description": "Maximum link depth from each start URL (0–10).",
+      "default": 2
+    },
+    {
+      "title": "Concurrency",
+      "name": "concurrency",
+      "type": "integer",
+      "editor": "number",
+      "description": "Number of concurrent page tasks (1–50).",
+      "default": 5
+    },
+    {
+      "title": "Request timeout (seconds)",
+      "name": "requestTimeoutSecs",
+      "type": "integer",
+      "editor": "number",
+      "description": "Timeout per page request in seconds (5–600).",
+      "default": 60
+    },
+    {
+      "title": "Headless",
+      "name": "headless",
+      "type": "boolean",
+      "editor": "switch",
+      "description": "Run browser headless.",
+      "default": true
+    },
+    {
+      "title": "Use proxy",
+      "name": "useProxy",
+      "type": "boolean",
+      "editor": "switch",
+      "description": "Use platform proxy when PROXY_AUTH is set.",
+      "default": false
+    },
+    {
+      "title": "Extract mode",
+      "name": "extractMode",
+      "type": "string",
+      "editor": "select",
+      "description": "Output content format: markdown, html, or text.",
+      "options": [
+        { "label": "Markdown", "value": "markdown" },
+        { "label": "HTML", "value": "html" },
+        { "label": "Text", "value": "text" }
+      ],
+      "default": "markdown"
+    },
+    {
+      "title": "Max results",
+      "name": "maxResults",
+      "type": "integer",
+      "editor": "number",
+      "description": "Maximum output items to push (1–200000).",
+      "default": 1000
+    },
+    {
+      "title": "Same domain only",
+      "name": "sameDomainOnly",
+      "type": "boolean",
+      "editor": "switch",
+      "description": "Only follow links within start URL domains.",
+      "default": true
+    },
+    {
+      "title": "Include URL patterns",
+      "name": "includePatterns",
+      "type": "array",
+      "editor": "stringList",
+      "description": "Only include URLs matching these regex patterns (optional).",
+      "default": []
+    },
+    {
+      "title": "Exclude URL patterns",
+      "name": "excludePatterns",
+      "type": "array",
+      "editor": "stringList",
+      "description": "Exclude URLs matching these regex patterns.",
+      "default": []
+    },
+    {
+      "title": "Max retries",
+      "name": "maxRetries",
+      "type": "integer",
+      "editor": "number",
+      "description": "Retry failed pages up to this count (0–10).",
+      "default": 2
+    },
+    {
+      "title": "Clean content",
+      "name": "cleanContent",
+      "type": "boolean",
+      "editor": "switch",
+      "description": "Remove navigation-heavy lines and normalize whitespace.",
+      "default": true
+    },
+    {
+      "title": "Include raw content",
+      "name": "includeRawContent",
+      "type": "boolean",
+      "editor": "switch",
+      "description": "Include unmodified content in a separate field.",
+      "default": false
+    },
+    {
+      "title": "Max content characters",
+      "name": "maxContentChars",
+      "type": "integer",
+      "editor": "number",
+      "description": "Truncate content to this length (0 = unlimited, max 500000).",
+      "default": 0
+    },
+    {
+      "title": "Content excerpt characters",
+      "name": "contentExcerptChars",
+      "type": "integer",
+      "editor": "number",
+      "description": "Length of content excerpt for previews (0–5000).",
+      "default": 300
+    },
+    {
+      "title": "Wait until",
+      "name": "waitUntil",
+      "type": "string",
+      "editor": "select",
+      "description": "Page load strategy: domcontentloaded (fast), load, or networkidle (SPA/slow sites).",
+      "options": [
+        { "label": "DOM content loaded", "value": "domcontentloaded" },
+        { "label": "Load", "value": "load" },
+        { "label": "Network idle", "value": "networkidle" }
+      ],
+      "default": "domcontentloaded"
+    },
+    {
+      "title": "Wait for selector",
+      "name": "waitForSelector",
+      "type": "string",
+      "editor": "textfield",
+      "description": "CSS selector to wait for before extraction (e.g. .article-body). Use css: or js: prefix for advanced.",
+      "default": ""
+    },
+    {
+      "title": "CSS selector (extract region)",
+      "name": "cssSelector",
+      "type": "string",
+      "editor": "textfield",
+      "description": "Extract only content inside this CSS selector (e.g. main, .content).",
+      "default": ""
+    },
+    {
+      "title": "Crawl mode",
+      "name": "crawlMode",
+      "type": "string",
+      "editor": "select",
+      "description": "full = extract content; discover_only = only URLs and links (no content).",
+      "options": [
+        { "label": "Full (extract content)", "value": "full" },
+        { "label": "Discover only (links)", "value": "discover_only" }
+      ],
+      "default": "full"
+    },
+    {
+      "title": "Include link URLs",
+      "name": "includeLinkUrls",
+      "type": "boolean",
+      "editor": "switch",
+      "description": "Include links_internal and links_external arrays in each item (full mode).",
+      "default": false
+    }
+  ]
+}

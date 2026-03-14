@@ -1,44 +1,50 @@
 # Website Content Extractor
 
-Apify Actor: extract page content (markdown/HTML/text), metadata, and link stats. Uses [crawl4ai](https://github.com/unclecode/crawl4ai).
+CafeScraper Worker: crawls one or more start URLs, extracts page content (markdown, HTML, or text), metadata, and link stats. Uses [crawl4ai](https://github.com/unclecode/crawl4ai) for browser-based extraction.
 
-## Quick start
+## Quick start (CafeScraper Worker)
+
+- **Entry point:** `main.py` (root). The platform runs this and communicates via gRPC (`127.0.0.1:20086`).
+- **Input:** Defined in `input_schema.json` (CafeScraper format). Required: `startUrls`. Optional: `maxPages`, `maxDepth`, `extractMode`, `crawlMode`, etc.
+- **Output:** Each crawled page is pushed as one row: `url`, `success`, `status_code`, `content`, `title`, `content_excerpt`, `content_length`, `links_internal_count`, `links_external_count`, `extracted_at`, and more.
 
 ```bash
-pip install -e ".[dev]"
+pip install -r requirements.txt
 crawl4ai-setup
-python -m crawl4ai_actor.main
+python main.py
 ```
 
-Input: `startUrls` (required), `maxPages`, `maxDepth`, `waitUntil`, `waitForSelector`, `cssSelector`, etc. Full schema: [.actor/input_schema.json](.actor/input_schema.json).
+When run on CafeScraper, the platform injects input via the SDK and optional proxy via `PROXY_AUTH`. Set **Use proxy** in the input (or rely on platform defaults) to use the injected proxy.
 
-Output: dataset with `url`, `success`, `content`, `title`, `content_length`, `links_internal_count`, etc. Run summary in Storage → Key-value store (`runSummary`), including `failedUrls` for retries.
+## Input (main fields)
 
-## Options (high level)
+| Field | Description |
+|-------|-------------|
+| `startUrls` | Starting URLs to crawl (required). |
+| `maxPages` | Max pages to process (default 50). |
+| `maxDepth` | Max link depth from start URLs (default 2). |
+| `extractMode` | `markdown` \| `html` \| `text`. |
+| `crawlMode` | `full` (extract content) \| `discover_only` (URLs and links only). |
+| `waitUntil` | `domcontentloaded` \| `load` \| `networkidle`. |
+| `waitForSelector` | CSS selector to wait for before extraction. |
+| `cssSelector` | Extract only content inside this selector. |
 
-| Option | Purpose |
-|--------|--------|
-| `crawlMode` | `full` (default) \| `discover_only` — discover_only = URLs + links only, no content |
-| `includeLinkUrls` | Include `links_internal` / `links_external` arrays in each item |
-| `waitUntil` | `domcontentloaded` \| `load` \| `networkidle` (SPA/slow sites) |
-| `pageLoadWaitSecs` | Extra delay before capture |
-| `waitForSelector` | Wait for CSS selector (or `css:`/`js:` prefix) |
-| `cssSelector` | Extract only this region (e.g. `main`, `.article`) |
-| `virtualScrollSelector` | Infinite-scroll container to expand |
+**Example (SPA / slow site):** `startUrls: ["https://..."], waitUntil: "networkidle", pageLoadWaitSecs: 2`  
+**Example (discover links only):** `startUrls: ["https://..."], crawlMode: "discover_only", maxPages: 100`
 
-**Example — SPA / slow site:** `{ "startUrls": ["https://..."], "waitUntil": "networkidle", "pageLoadWaitSecs": 2 }`  
-**Example — discover links only:** `{ "startUrls": ["https://..."], "crawlMode": "discover_only", "maxPages": 100 }`
+## Project layout
 
-## Run locally / Docker
+- `main.py` — CafeScraper worker entry: reads input via SDK, runs crawler, pushes results.
+- `input_schema.json` — CafeScraper input form (description, `b`, `properties`).
+- `sdk.py`, `sdk_pb2.py`, `sdk_pb2_grpc.py` — CafeScraper gRPC SDK.
+- `src/crawl4ai_actor/` — Crawl logic: `config.py` (input model), `crawler.py` (crawl4ai crawl loop).
+- `requirements.txt` — Python deps (crawl4ai, pydantic, grpcio, protobuf).
 
-```bash
-docker build -t website-content-extractor .
-```
+## Browser
 
-## Regression
+The worker uses crawl4ai’s built-in browser (Playwright). The run environment must have Chromium available (e.g. `playwright install chromium` or an image with Chromium). Proxy is applied when the platform sets `PROXY_AUTH`.
 
-```bash
-UX_MATRIX_GROUP=core python scripts/ux_matrix.py
-```
+## Local / dev
 
-Reports: `scripts/ux_matrix_output.json`, `scripts/ux_matrix_report.txt` (gitignored).
+- Run the worker locally: ensure the CafeScraper runtime is present (gRPC server on `127.0.0.1:20086`), or mock input and call the crawler directly.
+- Run the original Apify-style actor (if you keep it): `python -m crawl4ai_actor.main` with Apify storage and input.

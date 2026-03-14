@@ -1,0 +1,4 @@
+crawl4ai
+pydantic>=2.7
+grpcio>=1.74.0
+protobuf>=4.21.0
