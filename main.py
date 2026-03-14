@@ -39,7 +39,23 @@ HEADER_KEYS = [h["key"] for h in RESULT_TABLE_HEADERS]
 
 
 def _normalize_start_urls(value):
-    if not value or not isinstance(value, list):
+    """Normalize startUrls from various shapes to a list of URL strings.
+
+    Accepts:
+    - list of strings: ["https://...", ...]
+    - list of dicts: [{"url": "https://..."}, {"string": "https://..."}]
+    - single dict: {"url": "https://..."} (CafeScraper/requestList edge case)
+    - single string: "https://..."
+    """
+    if not value:
+        return []
+    # Single dict -> wrap to list
+    if isinstance(value, dict):
+        value = [value]
+    # Single string -> wrap to list
+    if isinstance(value, str):
+        value = [value]
+    if not isinstance(value, list):
         return []
     out = []
     for x in value:
@@ -112,10 +128,13 @@ def _validate_and_clamp(input_dict: dict) -> None:
 async def run():
     try:
         raw = CafeSDK.Parameter.get_input_json_dict() or {}
+        CafeSDK.Log.debug(f"Raw input JSON from CafeScraper: {raw}")
         raw = {k: v for k, v in raw.items() if k != "version"}
         input_dict = {**DEFAULT_INPUT, **raw}
 
-        start_urls = _normalize_start_urls(input_dict.get("startUrls"))
+        raw_urls = input_dict.get("startUrls") or input_dict.get("start_urls") or input_dict.get("starturls")
+        start_urls = _normalize_start_urls(raw_urls)
+        CafeSDK.Log.debug(f"Normalized startUrls: {start_urls}")
         if not start_urls:
             CafeSDK.Log.error("Missing required input: startUrls.")
             CafeSDK.Result.push_data({"error": "Missing startUrls", "error_code": "400", "status": "failed"})
