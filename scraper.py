@@ -6,7 +6,7 @@ import hashlib
 import os
 import re
 from collections import deque
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 from urllib.parse import urlparse, urlunparse
 
@@ -272,7 +272,7 @@ async def run_crawler(
                     queue.append((url, depth))
                     continue
 
-                extracted_at = datetime.now(UTC).isoformat()
+                extracted_at = datetime.now(timezone.utc).isoformat()
                 _err_type = None if success else ("blocked" if status_code in (401, 403) else ("rate_limited" if status_code == 429 else "network_error"))
                 if crawl_mode == "discover_only":
                     item = {

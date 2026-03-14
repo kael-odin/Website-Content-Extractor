@@ -6,7 +6,7 @@ import hashlib
 import os
 import re
 from collections import deque
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 from urllib.parse import urlparse, urlunparse
 
@@ -227,7 +227,7 @@ async def run_crawler(
                 queue.append((url, depth))
                 continue
 
-            extracted_at = datetime.now(UTC).isoformat()
+            extracted_at = datetime.now(timezone.utc).isoformat()
             meta = _meta(result) if result else {}
             links = getattr(result, "links", None) or {}
             internal = _link_urls(links.get("internal", []) if isinstance(links, dict) else [])
