@@ -1,3 +1,6 @@
+import pytest
+from pydantic import ValidationError
+
 from crawl4ai_actor.config import ActorInput
 
 
@@ -42,3 +45,13 @@ def test_input_aliases() -> None:
     assert parsed.max_requests_per_minute == 120
     assert parsed.enable_stealth is True
     assert parsed.user_agent == "UA"
+
+
+def test_validation_requires_start_urls() -> None:
+    with pytest.raises(ValidationError):
+        ActorInput(**{})
+
+
+def test_validation_requires_non_empty_start_urls() -> None:
+    with pytest.raises(ValidationError):
+        ActorInput(**{"startUrls": []})

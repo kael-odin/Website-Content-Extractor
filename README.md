@@ -117,11 +117,11 @@ docker build -t website-content-extractor .
 
 ## Run summary (Actor output)
 
-When the crawl finishes, the Actor writes a **run summary** to the run’s key-value store under the key `runSummary`:
+When the crawl finishes (or on invalid input / crawl error), the Actor writes a **run summary** to the run’s key-value store under the key `runSummary`:
 
-- `totalPages`, `successCount`, `failedCount`, `errorTypes` (e.g. `page_error`, `network_error`, `rate_limited`), `totalContentLength`
+- `totalPages`, `successCount`, `failedCount`, `errorTypes` (e.g. `page_error`, `network_error`, `rate_limited`, `validation_error`), `totalContentLength`
 
-Use it in the Apify run **Storage** tab or via API to see at a glance how the run went.
+The summary is always written so you can see what happened even when the run fails. Use the Apify run **Storage** tab or API to read it.
 
 ## UX regression (matrix)
 
