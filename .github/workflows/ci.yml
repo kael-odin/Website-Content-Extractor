@@ -25,3 +25,20 @@ jobs:
         run: python -m ruff check .
       - name: Tests
         run: python -m pytest
+
+  ux-matrix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip
+          python -m pip install -e ".[dev]"
+      - name: Install browser (Playwright Chromium)
+        run: python -m playwright install --with-deps chromium
+      - name: UX matrix (core)
+        run: UX_MATRIX_GROUP=core python scripts/ux_matrix.py
